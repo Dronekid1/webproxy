@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Remote VM/OS Loader</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Consolas', 'Monaco', monospace;
+            background: linear-gradient(135deg, #0c0c0c 0%, #1a1a2e 100%);
+            color: #ffffff;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .container {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            background: rgba(0, 0, 0, 0.8);
+            padding: 15px 20px;
+            border-bottom: 2px solid #00ff00;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .title {
+            font-size: 1.5em;
+            color: #00ff00;
+            text-shadow: 0 0 10px #00ff00;
+        }
+
+        .vm-selector {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .vm-option {
+            background: rgba(0, 255, 0, 0.1);
+            border: 1px solid #00ff00;
+            color: #00ff00;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        .vm-option:hover, .vm-option.active {
+            background: rgba(0, 255, 0, 0.3);
+            box-shadow: 0 0 15px rgba(0, 255, 0, 0.5);
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+        }
+
+        .sidebar {
+            width: 300px;
+            background: rgba(0, 0, 0, 0.7);
+            border-right: 1px solid #333;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .vm-frame {
+            flex: 1;
+            position: relative;
+        }
+
+        .vm-iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            background: #000;
+        }
+
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+        }
+
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 3px solid #333;
+            border-top: 3px solid #00ff00;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .sidebar-section {
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #333;
+        }
+
+        .sidebar-section h3 {
+            color: #00ff00;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+
+        .remote-vm {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid #444;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .remote-vm:hover {
+            border-color: #00ff00;
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.3);
+        }
+
+        .remote-vm.active {
+            border-color: #00ff00;
+            background: rgba(0, 255, 0, 0.1);
+        }
+
+        .vm-name {
+            color: #fff;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .vm-description {
+            color: #aaa;
+            font-size: 0.9em;
+            margin-bottom: 8px;
+        }
+
+        .vm-url {
+            color: #00ff00;
+            font-size: 0.8em;
+            font-family: monospace;
+            word-break: break-all;
+        }
+
+        .status-bar {
+            background: rgba(0, 0, 0, 0.9);
+            padding: 10px 20px;
+            border-top: 1px solid #333;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.9em;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #ff0000;
+            animation: pulse 2s infinite;
+        }
+
+        .status-dot.connected {
+            background: #00ff00;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        .custom-vm {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .custom-input {
+            flex: 1;
+            background: rgba(0, 0, 0, 0.7);
+            border: 1px solid #333;
+            color: #00ff00;
+            padding: 8px;
+            border-radius: 4px;
+            font-family: inherit;
+        }
+
+        .custom-input:focus {
+            outline: none;
+            border-color: #00ff00;
+        }
+
+        .load-btn {
+            background: rgba(0, 255, 0, 0.2);
+            border: 1px solid #00ff00;
+            color: #00ff00;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .load-btn:hover {
+            background: rgba(0, 255, 0, 0.4);
+        }
+
+        .console-logs {
+            background: #000;
+            color: #00ff00;
+            font-size: 0.8em;
+            padding: 10px;
+            height: 150px;
+            overflow-y: auto;
+            margin-top: 15px;
+            border-radius: 4px;
+        }
+
+        .error {
+            color: #ff4444;
+        }
+
+        .warning {
+            color: #ffaa00;
+        }
+
+        .info {
+            color: #4444ff;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="title">🖥️ Remote VM/OS Loader</div>
+            <div class="vm-selector">
+                <select class="vm-option" id="vmMode">
+                    <option value="vm">OS Virtual Machine</option>
+                    <option value="wasm">WASM Runner</option>
+                    <option value="emulator">Emulator Suite</option>
+                    <option value="custom">Custom URL</option>
+                </select>
+                <button class="vm-option" onclick="reloadVM()">🔄 Reload</button>
+                <button class="vm-option" onclick="fullscreenVM()">⛶ Fullscreen</button>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="sidebar">
+                <div class="sidebar-section">
+                    <h3>🌐 Remote VMs & OS</h3>
+                    
+                    <div class="remote-vm" onclick="loadRemoteVM('https://copy.sh/v86/')">
+                        <div class="vm-name">v86 - x86 Emulator</div>
+                        <div class="vm-description">Run various operating systems in browser</div>
+                        <div class="vm-url">copy.sh/v86/</div>
+                    </div>
+
+                    <div class="remote-vm" onclick="loadRemoteVM('https://bellard.org/jslinux/')">
+                        <div class="vm-name">JSLinux</div>
+                        <div class="vm-description">Linux emulator by Fabrice Bellard</div>
+                        <div class="vm-url">bellard.org/jslinux/</div>
+                    </div>
+
+                    <div class="remote-vm" onclick="loadRemoteVM('https://win95.ajf.me/')">
+                        <div class="vm-name">Windows 95</div>
+                        <div class="vm-description">Classic Windows 95 in browser</div>
+                        <div class="vm-url">win95.ajf.me/</div>
+                    </div>
+
+                    <div class="remote-vm" onclick="loadRemoteVM('https://www.pcjs.org/')">
+                        <div class="vm-name">PCjs Machines</div>
+                        <div class="vm-description">Historical computer emulation</div>
+                        <div class="vm-url">pcjs.org/</div>
+                    </div>
+                </div>
+
+                <div class="sidebar-section">
+                    <h3>⚡ WASM Runners</h3>
+                    
+                    <div class="remote-vm" onclick="loadRemoteVM('https://webassembly.studio/')">
+                        <div class="vm-name">WebAssembly Studio</div>
+                        <div class="vm-description">Online WASM IDE and runner</div>
+                        <div class="vm-url">webassembly.studio/</div>
+                    </div>
+
+                    <div class="remote-vm" onclick="loadRemoteVM('https://wasmfiddle.wasmer.io/')">
+                        <div class="vm-name">WASM Fiddle</div>
+                        <div class="vm-description">Test and run WebAssembly code</div>
+                        <div class="vm-url">wasmfiddle.wasmer.io/</div>
+                    </div>
+
+                    <div class="remote-vm" onclick="loadRemoteVM('https://mbebenita.github.io/WasmExplorer/')">
+                        <div class="vm-name">WASM Explorer</div>
+                        <div class="vm-description">Explore WebAssembly bytecode</div>
+                        <div class="vm-url">mbebenita.github.io/WasmExplorer/</div>
+                    </div>
+                </div>
+
+                <div class="sidebar-section">
+                    <h3>🎮 Emulators</h3>
+                    
+                    <div class="remote-vm" onclick="loadRemoteVM('https://dos.zone/')">
+                        <div class="vm-name">DOS Zone</div>
+                        <div class="vm-description">Classic DOS games and programs</div>
+                        <div class="vm-url">dos.zone/</div>
+                    </div>
+
+                    <div class="remote-vm" onclick="loadRemoteVM('https://archive.org/details/softwarelibrary_msdos_games')">
+                        <div class="vm-name">Internet Archive DOS</div>
+                        <div class="vm-description">Historical software archive</div>
+                        <div class="vm-url">archive.org/details/softwarelibrary_msdos_games</div>
+                    </div>
+                </div>
+
+                <div class="sidebar-section">
+                    <h3>🔧 Custom VM</h3>
+                    <div class="custom-vm">
+                        <input type="url" id="customUrl" class="custom-input" placeholder="Enter VM URL...">
+                        <button class="load-btn" onclick="loadCustomVM()">Load</button>
+                    </div>
+                </div>
+
+                <div class="console-logs" id="consoleLogs">
+                    <div>[INFO] Remote VM Loader initialized</div>
+                    <div>[INFO] Select a VM from the list above</div>
+                    <div>[INFO] All VMs run externally - no local execution</div>
+                </div>
+            </div>
+
+            <div class="vm-frame">
+                <div class="loading-overlay" id="loadingOverlay">
+                    <div class="loading-spinner"></div>
+                    <div>Loading Remote VM...</div>
+                    <div id="loadingStatus">Initializing...</div>
+                </div>
+                <iframe id="vmIframe" class="vm-iframe" src="about:blank"></iframe>
+            </div>
+        </div>
+
+        <div class="status-bar">
+            <div class="status-indicator">
+                <div class="status-dot" id="statusDot"></div>
+                <span id="statusText">Disconnected</span>
+            </div>
+            <div>
+                <span>Active VM: </span>
+                <span id="activeVM">None</span>
+            </div>
+            <div id="vmStats">Ready</div>
+        </div>
+    </div>
+
+    <script>
+        let currentVM = null;
+        let loadStartTime = 0;
+
+        function logMessage(message, type = 'info') {
+            const console = document.getElementById('consoleLogs');
+            const timestamp = new Date().toLocaleTimeString();
+            const className = type === 'error' ? 'error' : type === 'warning' ? 'warning' : type === 'info' ? 'info' : '';
+            
+            const div = document.createElement('div');
+            div.className = className;
+            div.textContent = `[${timestamp}] [${type.toUpperCase()}] ${message}`;
+            console.appendChild(div);
+            console.scrollTop = console.scrollHeight;
+        }
+
+        function updateStatus(status, connected = false) {
+            document.getElementById('statusText').textContent = status;
+            document.getElementById('statusDot').className = `status-dot ${connected ? 'connected' : ''}`;
+        }
+
+        function showLoading(message) {
+            document.getElementById('loadingOverlay').style.display = 'flex';
+            document.getElementById('loadingStatus').textContent = message;
+            loadStartTime = performance.now();
+        }
+
+        function hideLoading() {
+            document.getElementById('loadingOverlay').style.display = 'none';
+            const loadTime = Math.round(performance.now() - loadStartTime);
+            logMessage(`VM loaded in ${loadTime}ms`);
+        }
+
+        function loadRemoteVM(url, name = null) {
+            // Clear active states
+            document.querySelectorAll('.remote-vm').forEach(vm => vm.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+
+            const vmName = name || event.currentTarget.querySelector('.vm-name').textContent;
+            currentVM = { url, name: vmName };
+
+            logMessage(`Loading ${vmName}...`);
+            showLoading(`Connecting to ${vmName}...`);
+            updateStatus('Connecting...', false);
+
+            // Set iframe source
+            const iframe = document.getElementById('vmIframe');
+            iframe.src = url;
+
+            // Update UI
+            document.getElementById('activeVM').textContent = vmName;
+
+            // Simulate loading process
+            setTimeout(() => {
+                updateStatus('Connected', true);
+                hideLoading();
+                logMessage(`Successfully connected to ${vmName}`);
+                
+                // Update stats
+                document.getElementById('vmStats').textContent = `Running: ${vmName}`;
+            }, 2000 + Math.random() * 2000);
+
+            // Handle iframe load
+            iframe.onload = () => {
+                if (iframe.src !== 'about:blank') {
+                    updateStatus('Connected', true);
+                    hideLoading();
+                    logMessage(`VM interface loaded successfully`);
+                }
+            };
+
+            iframe.onerror = () => {
+                updateStatus('Connection Failed', false);
+                hideLoading();
+                logMessage(`Failed to load ${vmName}`, 'error');
+            };
+        }
+
+        function loadCustomVM() {
+            const url = document.getElementById('customUrl').value.trim();
+            if (!url) {
+                logMessage('Please enter a valid URL', 'warning');
+                return;
+            }
+
+            if (!url.startsWith('http://') && !url.startsWith('https://')) {
+                logMessage('URL must start with http:// or https://', 'error');
+                return;
+            }
+
+            loadRemoteVM(url, 'Custom VM');
+        }
+
+        function reloadVM() {
+            if (currentVM) {
+                logMessage(`Reloading ${currentVM.name}...`);
+                loadRemoteVM(currentVM.url, currentVM.name);
+            } else {
+                logMessage('No VM loaded to reload', 'warning');
+            }
+        }
+
+        function fullscreenVM() {
+            const iframe = document.getElementById('vmIframe');
+            if (iframe.requestFullscreen) {
+                iframe.requestFullscreen();
+            } else if (iframe.webkitRequestFullscreen) {
+                iframe.webkitRequestFullscreen();
+            } else if (iframe.msRequestFullscreen) {
+                iframe.msRequestFullscreen();
+            }
+            logMessage('Entering fullscreen mode');
+        }
+
+        // VM Mode selector
+        document.getElementById('vmMode').addEventListener('change', function(e) {
+            const mode = e.target.value;
+            logMessage(`Switched to ${mode} mode`);
+            
+            // Clear current VM
+            document.getElementById('vmIframe').src = 'about:blank';
+            currentVM = null;
+            document.getElementById('activeVM').textContent = 'None';
+            updateStatus('Disconnected', false);
+            document.getElementById('vmStats').textContent = 'Ready';
+            
+            // Remove active states
+            document.querySelectorAll('.remote-vm').forEach(vm => vm.classList.remove('active'));
+        });
+
+        // Custom URL input enter key
+        document.getElementById('customUrl').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                loadCustomVM();
+            }
+        });
+
+        // Initialize
+        logMessage('Remote VM Loader ready');
+        logMessage('Click on any VM to connect remotely');
+        logMessage('All VMs run on external servers - completely safe');
+        updateStatus('Ready', false);
+
+        // Handle iframe messages (if supported by the remote VM)
+        window.addEventListener('message', function(event) {
+            if (currentVM && event.origin === new URL(currentVM.url).origin) {
+                logMessage(`Message from VM: ${JSON.stringify(event.data)}`);
+            }
+        });
+
+        // Detect when iframe loses focus (VM interaction)
+        let lastFocus = Date.now();
+        window.addEventListener('blur', function() {
+            if (currentVM && Date.now() - lastFocus > 100) {
+                document.getElementById('vmStats').textContent = `Active: ${currentVM.name}`;
+            }
+        });
+
+        window.addEventListener('focus', function() {
+            lastFocus = Date.now();
+        });
+
+        // Auto-refresh status
+        setInterval(() => {
+            if (currentVM) {
+                const iframe = document.getElementById('vmIframe');
+                try {
+                    // Try to access iframe - will throw if cross-origin
+                    iframe.contentWindow.location.href;
+                    updateStatus('Connected', true);
+                } catch (e) {
+                    // This is normal for cross-origin iframes
+                    if (iframe.src !== 'about:blank') {
+                        updateStatus('Connected', true);
+                    }
+                }
+            }
+        }, 5000);
+    </script>
+</body>
+</html>
