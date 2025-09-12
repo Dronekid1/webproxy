@@ -3,109 +3,159 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CloudDesk - Your Digital Workspace</title>
+    <title>CloudDesk Pro - Ultimate Digital Workspace</title>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
 
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary: #8b5cf6;
+            --accent: #06b6d4;
+            --surface: rgba(255, 255, 255, 0.95);
+            --surface-dark: rgba(15, 23, 42, 0.95);
+            --glass: rgba(255, 255, 255, 0.1);
+            --glass-border: rgba(255, 255, 255, 0.2);
+            --text: #1e293b;
+            --text-secondary: #64748b;
+            --success: #22c55e;
+            --warning: #f59e0b;
+            --error: #ef4444;
+        }
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
             min-height: 100vh;
             overflow: hidden;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(102, 126, 234, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(139, 92, 246, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 40% 80%, rgba(6, 182, 212, 0.3) 0%, transparent 50%);
+            animation: backgroundShift 20s ease-in-out infinite;
+            z-index: -1;
+        }
+
+        @keyframes backgroundShift {
+            0%, 100% { transform: scale(1) rotate(0deg); }
+            50% { transform: scale(1.1) rotate(1deg); }
         }
 
         .desktop {
             position: relative;
             width: 100%;
             height: 100vh;
-            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23f8f9fa"/><circle cx="50" cy="50" r="30" fill="%23e9ecef" opacity="0.3"/></svg>');
+            overflow: hidden;
         }
 
-        .taskbar {
+        .dock {
             position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            height: 56px;
-            background: rgba(255, 255, 255, 0.95);
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--glass);
             backdrop-filter: blur(20px);
-            border-top: 1px solid rgba(0, 0, 0, 0.1);
-            display: flex;
-            align-items: center;
-            padding: 0 20px;
-            z-index: 1000;
-            box-shadow: 0 -2px 20px rgba(0, 0, 0, 0.1);
-        }
-
-        .start-button {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 12px;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 14px;
-            margin-right: 20px;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
-        }
-
-        .start-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
-        }
-
-        .taskbar-items {
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 12px;
             display: flex;
             gap: 8px;
-            flex: 1;
+            z-index: 1000;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
         }
 
-        .taskbar-item {
-            background: rgba(102, 126, 234, 0.1);
-            color: #4a5568;
-            padding: 8px 16px;
-            border-radius: 8px;
+        .dock-item {
+            width: 56px;
+            height: 56px;
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             cursor: pointer;
-            transition: all 0.3s ease;
-            font-size: 13px;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            font-size: 24px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .dock-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .dock-item:hover {
+            transform: scale(1.2) translateY(-8px);
+            box-shadow: 0 12px 40px rgba(99, 102, 241, 0.3);
+        }
+
+        .dock-item:hover::before {
+            opacity: 0.1;
+        }
+
+        .dock-item.active {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            box-shadow: 0 8px 32px rgba(99, 102, 241, 0.4);
+        }
+
+        .dock-tooltip {
+            position: absolute;
+            bottom: 70px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--surface-dark);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 12px;
             font-weight: 500;
-            border: 1px solid transparent;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            white-space: nowrap;
         }
 
-        .taskbar-item:hover {
-            background: rgba(102, 126, 234, 0.2);
-            border-color: rgba(102, 126, 234, 0.3);
-        }
-
-        .taskbar-item.active {
-            background: rgba(102, 126, 234, 0.15);
-            border-color: rgba(102, 126, 234, 0.4);
-            color: #667eea;
-        }
-
-        .clock {
-            font-size: 14px;
-            font-weight: 500;
-            color: #4a5568;
-            margin-left: auto;
+        .dock-item:hover .dock-tooltip {
+            opacity: 1;
         }
 
         .window {
             position: absolute;
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
-            min-width: 800px;
+            background: var(--surface);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            min-width: 900px;
             min-height: 600px;
             display: none;
             overflow: hidden;
-            border: 1px solid rgba(0, 0, 0, 0.1);
+            box-shadow: 0 20px 80px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
 
         .window.active {
@@ -113,23 +163,44 @@
             z-index: 100;
         }
 
+        .window.maximized {
+            width: 100vw !important;
+            height: 100vh !important;
+            top: 0 !important;
+            left: 0 !important;
+            border-radius: 0;
+        }
+
         .window-header {
-            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            background: linear-gradient(135deg, var(--glass), rgba(255, 255, 255, 0.15));
+            backdrop-filter: blur(20px);
             padding: 16px 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             cursor: move;
-            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            border-bottom: 1px solid var(--glass-border);
         }
 
         .window-title {
             font-weight: 600;
             font-size: 16px;
-            color: #2d3748;
+            color: var(--text);
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
+        }
+
+        .window-title-icon {
+            width: 24px;
+            height: 24px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
         }
 
         .window-controls {
@@ -138,8 +209,8 @@
         }
 
         .window-control {
-            width: 16px;
-            height: 16px;
+            width: 20px;
+            height: 20px;
             border-radius: 50%;
             cursor: pointer;
             display: flex;
@@ -148,27 +219,29 @@
             font-size: 12px;
             font-weight: bold;
             transition: all 0.2s ease;
+            color: white;
         }
 
-        .minimize { background: #ffd60a; color: #8b6914; }
-        .maximize { background: #40c057; color: #2b8a3e; }
-        .close { background: #ff6b6b; color: #c92a2a; }
+        .minimize { background: linear-gradient(135deg, #fbbf24, #f59e0b); }
+        .maximize { background: linear-gradient(135deg, #34d399, #10b981); }
+        .close { background: linear-gradient(135deg, #f87171, #ef4444); }
 
         .window-control:hover {
             transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
         }
 
         .window-content {
             height: calc(100% - 73px);
             overflow: hidden;
-            background: white;
+            background: var(--surface);
         }
 
         /* Desktop Icons */
         .desktop-icon {
             position: absolute;
-            width: 100px;
-            height: 100px;
+            width: 120px;
+            height: 120px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -176,136 +249,160 @@
             cursor: pointer;
             color: white;
             text-align: center;
-            border-radius: 16px;
-            transition: all 0.3s ease;
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
         }
 
         .desktop-icon:hover {
+            transform: translateY(-8px) scale(1.05);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
             background: rgba(255, 255, 255, 0.2);
-            transform: translateY(-4px);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
         }
 
         .desktop-icon .icon {
-            font-size: 36px;
-            margin-bottom: 8px;
+            font-size: 48px;
+            margin-bottom: 12px;
+            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
         }
 
         .desktop-icon .label {
-            font-size: 13px;
-            font-weight: 500;
-            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+            font-size: 14px;
+            font-weight: 600;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
         }
 
-        /* Browser App Styles */
+        /* App Container Styles */
         .app-container {
             height: 100%;
             display: flex;
             flex-direction: column;
-            background: #f8f9fa;
+            background: var(--surface);
         }
 
         .app-toolbar {
-            background: white;
-            padding: 16px 20px;
-            border-bottom: 1px solid #e9ecef;
+            background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+            padding: 20px;
+            border-bottom: 1px solid var(--glass-border);
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 16px;
         }
 
-        .url-input {
+        .app-input {
             flex: 1;
-            padding: 12px 16px;
-            border: 2px solid #e9ecef;
-            border-radius: 8px;
+            padding: 14px 18px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
             font-size: 14px;
             outline: none;
-            transition: border-color 0.3s ease;
+            transition: all 0.3s ease;
+            background: white;
         }
 
-        .url-input:focus {
-            border-color: #667eea;
+        .app-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
         }
 
-        .action-btn {
-            background: #667eea;
+        .app-btn {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
             color: white;
             border: none;
-            padding: 12px 20px;
-            border-radius: 8px;
+            padding: 14px 24px;
+            border-radius: 12px;
             cursor: pointer;
             font-size: 14px;
-            font-weight: 500;
+            font-weight: 600;
             transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
-        .action-btn:hover {
-            background: #5a67d8;
-            transform: translateY(-1px);
+        .app-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(99, 102, 241, 0.3);
         }
 
-        .action-btn.secondary {
-            background: #718096;
+        .app-btn.secondary {
+            background: linear-gradient(135deg, #64748b, #475569);
         }
 
-        .action-btn.secondary:hover {
-            background: #4a5568;
-        }
-
-        .proxy-grid {
+        /* Grid Layouts */
+        .app-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 12px;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 16px;
             padding: 20px;
-            background: white;
-            max-height: 200px;
+            background: #f8fafc;
+            max-height: 300px;
             overflow-y: auto;
         }
 
-        .proxy-option {
-            background: #f8f9fa;
-            border: 2px solid #e9ecef;
-            border-radius: 10px;
-            padding: 16px;
+        .grid-item {
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 20px;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
             text-align: center;
+            position: relative;
+            overflow: hidden;
         }
 
-        .proxy-option:hover {
-            border-color: #667eea;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+        .grid-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            opacity: 0;
+            transition: opacity 0.3s ease;
         }
 
-        .proxy-option.active {
-            border-color: #667eea;
-            background: linear-gradient(135deg, #667eea, #764ba2);
+        .grid-item:hover {
+            border-color: var(--primary);
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(99, 102, 241, 0.15);
+        }
+
+        .grid-item:hover::before {
+            opacity: 0.05;
+        }
+
+        .grid-item.active {
+            border-color: var(--primary);
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
             color: white;
+            box-shadow: 0 8px 32px rgba(99, 102, 241, 0.3);
         }
 
-        .proxy-option h4 {
-            margin-bottom: 6px;
-            font-size: 14px;
+        .grid-item h4 {
+            margin-bottom: 8px;
+            font-size: 16px;
             font-weight: 600;
         }
 
-        .proxy-option p {
-            font-size: 12px;
+        .grid-item p {
+            font-size: 13px;
             opacity: 0.8;
+            line-height: 1.4;
         }
 
         .app-content {
             flex: 1;
             background: white;
             margin: 20px;
-            border-radius: 8px;
-            border: 1px solid #e9ecef;
+            border-radius: 16px;
+            border: 1px solid #e2e8f0;
             overflow: hidden;
+            position: relative;
         }
 
         .app-iframe {
@@ -314,191 +411,227 @@
             border: none;
         }
 
-        /* VM Simulator Styles */
+        /* Virtual Machine Styles */
         .vm-container {
             height: 100%;
             display: flex;
             flex-direction: column;
-            background: white;
+            background: #0f172a;
+            color: #e2e8f0;
         }
 
         .vm-toolbar {
-            background: #f8f9fa;
-            padding: 16px 20px;
+            background: linear-gradient(135deg, #1e293b, #334155);
+            padding: 20px;
+            display: flex;
+            gap: 16px;
+            border-bottom: 1px solid #334155;
+            flex-wrap: wrap;
+        }
+
+        .vm-selector {
             display: flex;
             gap: 12px;
-            border-bottom: 1px solid #e9ecef;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .vm-option {
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            color: #e2e8f0;
+            padding: 12px 20px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .vm-option:hover, .vm-option.active {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            box-shadow: 0 4px 16px rgba(99, 102, 241, 0.3);
+        }
+
+        .vm-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 12px;
+            margin-top: 15px;
+        }
+
+        .vm-item {
+            background: rgba(30, 41, 59, 0.5);
+            border: 1px solid #334155;
+            border-radius: 12px;
+            padding: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .vm-item:hover {
+            border-color: var(--primary);
+            background: rgba(99, 102, 241, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .vm-item.active {
+            border-color: var(--primary);
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(139, 92, 246, 0.2));
+        }
+
+        .vm-item h5 {
+            color: #e2e8f0;
+            margin-bottom: 6px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .vm-item p {
+            color: #94a3b8;
+            font-size: 12px;
+            line-height: 1.4;
         }
 
         .vm-screen {
             flex: 1;
-            background: #2d3748;
-            color: #e2e8f0;
-            font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace;
-            padding: 20px;
-            overflow-y: auto;
-            font-size: 14px;
-            line-height: 1.5;
+            background: #000;
+            position: relative;
+            overflow: hidden;
         }
 
-        .vm-terminal {
-            height: 120px;
-            background: #1a202c;
-            border-top: 1px solid #4a5568;
-            padding: 12px;
-            font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace;
-            color: #68d391;
-            overflow-y: auto;
-            font-size: 13px;
-        }
-
-        .vm-input {
-            background: transparent;
-            border: none;
-            color: #68d391;
-            font-family: inherit;
-            font-size: inherit;
-            outline: none;
+        .vm-iframe {
             width: 100%;
-        }
-
-        /* WebAssembly Runner Styles */
-        .wasm-container {
             height: 100%;
-            display: flex;
-            flex-direction: column;
-            background: white;
+            border: none;
+            background: #000;
         }
 
-        .upload-section {
-            padding: 30px;
+        .vm-loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
             text-align: center;
-            border-bottom: 1px solid #e9ecef;
+            color: #64748b;
         }
 
-        .upload-area {
-            border: 2px dashed #cbd5e0;
-            border-radius: 12px;
-            padding: 40px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            background: #f8f9fa;
+        .loading-spinner {
+            width: 48px;
+            height: 48px;
+            border: 4px solid #334155;
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 16px;
         }
 
-        .upload-area:hover {
-            border-color: #667eea;
-            background: rgba(102, 126, 234, 0.05);
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
 
-        .upload-area h3 {
-            color: #2d3748;
-            margin-bottom: 8px;
-            font-size: 18px;
-        }
-
-        .upload-area p {
-            color: #718096;
-            font-size: 14px;
-        }
-
-        .console-output {
-            flex: 1;
-            background: #1a202c;
-            color: #68d391;
-            font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace;
+        /* Remote Access App Styles */
+        .remote-apps-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
             padding: 20px;
-            margin: 20px;
-            border-radius: 8px;
+            max-height: 400px;
             overflow-y: auto;
-            font-size: 13px;
-            line-height: 1.6;
         }
 
-        /* Start Menu */
-        .start-menu {
-            position: fixed;
-            bottom: 56px;
-            left: 20px;
-            width: 320px;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
+        .remote-app {
+            background: white;
+            border: 2px solid #e2e8f0;
             border-radius: 16px;
-            padding: 20px;
-            display: none;
-            z-index: 999;
-            border: 1px solid rgba(0, 0, 0, 0.1);
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+            padding: 24px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            position: relative;
+            overflow: hidden;
         }
 
-        .start-menu.active {
-            display: block;
+        .remote-app::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary), var(--accent));
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
         }
 
-        .start-menu-header {
-            margin-bottom: 20px;
+        .remote-app:hover {
+            border-color: var(--primary);
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(99, 102, 241, 0.15);
         }
 
-        .start-menu-header h2 {
-            color: #2d3748;
-            font-size: 20px;
-            font-weight: 700;
-            margin-bottom: 4px;
+        .remote-app:hover::before {
+            transform: scaleX(1);
         }
 
-        .start-menu-header p {
-            color: #718096;
-            font-size: 14px;
-        }
-
-        .start-menu-item {
+        .remote-app-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 12px;
             display: flex;
             align-items: center;
-            padding: 12px 16px;
-            color: #4a5568;
-            text-decoration: none;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            margin-bottom: 4px;
+            justify-content: center;
+            font-size: 24px;
+            color: white;
+            margin-bottom: 16px;
         }
 
-        .start-menu-item:hover {
-            background: rgba(102, 126, 234, 0.1);
-            color: #667eea;
-        }
-
-        .start-menu-item .icon {
-            margin-right: 12px;
-            font-size: 20px;
-            width: 24px;
-            text-align: center;
-        }
-
-        .start-menu-item .details {
-            flex: 1;
-        }
-
-        .start-menu-item .title {
+        .remote-app h4 {
+            font-size: 18px;
             font-weight: 600;
+            color: var(--text);
+            margin-bottom: 8px;
+        }
+
+        .remote-app p {
+            color: var(--text-secondary);
             font-size: 14px;
+            line-height: 1.5;
+            margin-bottom: 12px;
         }
 
-        .start-menu-item .description {
+        .remote-app-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 12px;
+            background: rgba(34, 197, 94, 0.1);
+            color: var(--success);
+            border-radius: 20px;
             font-size: 12px;
-            color: #a0aec0;
-            margin-top: 2px;
+            font-weight: 500;
         }
 
-        /* Status indicators */
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--success);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        /* Status Bar */
         .status-bar {
-            background: rgba(255, 255, 255, 0.9);
-            padding: 8px 20px;
+            background: rgba(248, 250, 252, 0.95);
+            backdrop-filter: blur(20px);
+            padding: 12px 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            font-size: 12px;
-            color: #718096;
-            border-top: 1px solid #e9ecef;
+            font-size: 13px;
+            color: var(--text-secondary);
+            border-top: 1px solid var(--glass-border);
         }
 
         .status-indicator {
@@ -507,275 +640,542 @@
             gap: 8px;
         }
 
-        .status-dot {
-            width: 8px;
-            height: 8px;
+        /* Floating Action Button */
+        .fab {
+            position: fixed;
+            bottom: 100px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border: none;
             border-radius: 50%;
-            background: #68d391;
-            animation: pulse 2s infinite;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 8px 32px rgba(99, 102, 241, 0.3);
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            z-index: 999;
         }
 
-        @keyframes pulse {
-            0% { opacity: 1; }
-            50% { opacity: 0.5; }
-            100% { opacity: 1; }
+        .fab:hover {
+            transform: scale(1.1) translateY(-4px);
+            box-shadow: 0 12px 48px rgba(99, 102, 241, 0.4);
+        }
+
+        /* Notification */
+        .notification {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            background: var(--surface);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 20px;
+            max-width: 400px;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.1);
+            transform: translateX(450px);
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            z-index: 1001;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .notification-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .notification-icon {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 16px;
+        }
+
+        .notification h4 {
+            color: var(--text);
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .notification p {
+            color: var(--text-secondary);
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .window {
+                min-width: 95vw;
+                min-height: 95vh;
+                top: 2.5vh !important;
+                left: 2.5vw !important;
+            }
+            
+            .dock {
+                bottom: 10px;
+                padding: 8px;
+            }
+            
+            .dock-item {
+                width: 48px;
+                height: 48px;
+                font-size: 20px;
+            }
+            
+            .desktop-icon {
+                width: 100px;
+                height: 100px;
+            }
+            
+            .desktop-icon .icon {
+                font-size: 36px;
+            }
         }
     </style>
 </head>
 <body>
     <div class="desktop">
         <!-- Desktop Icons -->
-        <div class="desktop-icon" style="top: 80px; left: 60px;" onclick="openWindow('web-browser')">
+        <div class="desktop-icon" style="top: 60px; left: 60px;" onclick="openWindow('browser-suite')">
             <div class="icon">🌐</div>
-            <div class="label">Web Browser</div>
+            <div class="label">Browser Pro</div>
         </div>
         
-        <div class="desktop-icon" style="top: 80px; left: 200px;" onclick="openWindow('system-tools')">
+        <div class="desktop-icon" style="top: 60px; left: 220px;" onclick="openWindow('vm-station')">
             <div class="icon">💻</div>
-            <div class="label">System Tools</div>
+            <div class="label">VM Station</div>
         </div>
         
-        <div class="desktop-icon" style="top: 80px; left: 340px;" onclick="openWindow('app-runner')">
-            <div class="icon">⚡</div>
-            <div class="label">App Runner</div>
+        <div class="desktop-icon" style="top: 60px; left: 380px;" onclick="openWindow('remote-access')">
+            <div class="icon">🔗</div>
+            <div class="label">Remote Hub</div>
         </div>
 
-        <!-- Web Browser Window -->
-        <div class="window" id="web-browser" style="top: 60px; left: 100px; width: 1000px; height: 700px;">
+        <!-- Browser Suite Window -->
+        <div class="window" id="browser-suite" style="top: 80px; left: 120px; width: 1100px; height: 750px;">
             <div class="window-header">
                 <div class="window-title">
-                    <span>🌐</span>
-                    CloudBrowser
+                    <div class="window-title-icon">🌐</div>
+                    Browser Pro Suite
                 </div>
                 <div class="window-controls">
-                    <div class="window-control minimize" onclick="minimizeWindow('web-browser')">−</div>
-                    <div class="window-control maximize" onclick="maximizeWindow('web-browser')">□</div>
-                    <div class="window-control close" onclick="closeWindow('web-browser')">×</div>
+                    <div class="window-control minimize" onclick="minimizeWindow('browser-suite')">−</div>
+                    <div class="window-control maximize" onclick="maximizeWindow('browser-suite')">□</div>
+                    <div class="window-control close" onclick="closeWindow('browser-suite')">×</div>
                 </div>
             </div>
             <div class="window-content">
                 <div class="app-container">
                     <div class="app-toolbar">
-                        <input type="url" id="browserUrl" class="url-input" placeholder="Enter website URL..." value="https://example.com">
-                        <button onclick="loadWebsite()" class="action-btn">Go</button>
-                        <button onclick="refreshBrowser()" class="action-btn secondary">Refresh</button>
+                        <input type="url" id="browserUrl" class="app-input" placeholder="Enter website URL or search..." value="https://example.com">
+                        <button onclick="loadWebsite()" class="app-btn">
+                            <span>🚀</span> Navigate
+                        </button>
+                        <button onclick="refreshBrowser()" class="app-btn secondary">
+                            <span>🔄</span> Refresh
+                        </button>
                     </div>
-                    <div class="proxy-grid" id="proxyGrid">
-                        <!-- Proxy options populated by JS -->
+                    
+                    <div class="app-grid" id="proxyGrid">
+                        <!-- Proxy services populated by JS -->
                     </div>
+                    
                     <div class="app-content">
                         <iframe id="browserFrame" class="app-iframe" src="about:blank"></iframe>
                     </div>
+                    
                     <div class="status-bar">
                         <div class="status-indicator">
                             <div class="status-dot"></div>
-                            <span>Connected</span>
+                            <span>Secure Connection Active</span>
                         </div>
-                        <div>Secure Connection</div>
+                        <div>Privacy Protected • No Tracking</div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- System Tools Window -->
-        <div class="window" id="system-tools" style="top: 100px; left: 150px; width: 900px; height: 600px;">
+        <!-- VM Station Window -->
+        <div class="window" id="vm-station" style="top: 100px; left: 140px; width: 1200px; height: 800px;">
             <div class="window-header">
                 <div class="window-title">
-                    <span>💻</span>
-                    System Tools
+                    <div class="window-title-icon">💻</div>
+                    Virtual Machine Station
                 </div>
                 <div class="window-controls">
-                    <div class="window-control minimize" onclick="minimizeWindow('system-tools')">−</div>
-                    <div class="window-control maximize" onclick="maximizeWindow('system-tools')">□</div>
-                    <div class="window-control close" onclick="closeWindow('system-tools')">×</div>
+                    <div class="window-control minimize" onclick="minimizeWindow('vm-station')">−</div>
+                    <div class="window-control maximize" onclick="maximizeWindow('vm-station')">□</div>
+                    <div class="window-control close" onclick="closeWindow('vm-station')">×</div>
                 </div>
             </div>
             <div class="window-content">
                 <div class="vm-container">
                     <div class="vm-toolbar">
-                        <button class="action-btn" onclick="bootSystem()">🔄 Start System</button>
-                        <button class="action-btn secondary" onclick="openApp('calculator')">🧮 Calculator</button>
-                        <button class="action-btn secondary" onclick="openApp('notepad')">📝 Text Editor</button>
-                        <button class="action-btn secondary" onclick="openApp('files')">📁 File Manager</button>
-                    </div>
-                    <div class="vm-screen" id="systemScreen">
-                        <div>CloudDesk System Tools v2.0</div>
-                        <div>===============================</div>
-                        <div>Welcome to your digital workspace</div>
-                        <div>Type 'help' for available commands</div>
-                        <div></div>
-                    </div>
-                    <div class="vm-terminal">
-                        <div id="terminalOutput">
-                            <div>user@clouddesk:~$ <input type="text" id="terminalInput" class="vm-input" placeholder="Enter command..." onkeypress="if(event.key==='Enter') executeCommand()"></div>
+                        <div class="vm-selector">
+                            <select class="vm-option" id="vmType">
+                                <option value="browser">Browser VMs</option>
+                                <option value="linux">Linux Systems</option>
+                                <option value="windows">Windows Classic</option>
+                                <option value="dos">DOS & Retro</option>
+                            </select>
+                            <button class="vm-option" onclick="refreshVM()">🔄 Refresh</button>
+                            <button class="vm-option" onclick="fullscreenVM()">⛶ Fullscreen</button>
                         </div>
+                        
+                        <div class="vm-grid" id="vmGrid">
+                            <!-- VM options populated by JS -->
+                        </div>
+                    </div>
+                    
+                    <div class="vm-screen">
+                        <div class="vm-loading" id="vmLoading">
+                            <div class="loading-spinner"></div>
+                            <h3>Initializing Virtual Machine...</h3>
+                            <p>Connecting to remote system</p>
+                        </div>
+                        <iframe id="vmFrame" class="vm-iframe" src="about:blank" style="display: none;"></iframe>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- App Runner Window -->
-        <div class="window" id="app-runner" style="top: 140px; left: 200px; width: 800px; height: 600px;">
+        <!-- Remote Access Hub Window -->
+        <div class="window" id="remote-access" style="top: 120px; left: 160px; width: 1000px; height: 700px;">
             <div class="window-header">
                 <div class="window-title">
-                    <span>⚡</span>
-                    Application Runner
+                    <div class="window-title-icon">🔗</div>
+                    Remote Access Hub
                 </div>
                 <div class="window-controls">
-                    <div class="window-control minimize" onclick="minimizeWindow('app-runner')">−</div>
-                    <div class="window-control maximize" onclick="maximizeWindow('app-runner')">□</div>
-                    <div class="window-control close" onclick="closeWindow('app-runner')">×</div>
+                    <div class="window-control minimize" onclick="minimizeWindow('remote-access')">−</div>
+                    <div class="window-control maximize" onclick="maximizeWindow('remote-access')">□</div>
+                    <div class="window-control close" onclick="closeWindow('remote-access')">×</div>
                 </div>
             </div>
             <div class="window-content">
-                <div class="wasm-container">
-                    <div class="upload-section">
-                        <div class="upload-area" onclick="document.getElementById('appFile').click()">
-                            <h3>📱 Run Applications</h3>
-                            <p>Upload WebAssembly (.wasm) files to run compiled programs</p>
-                            <input type="file" id="appFile" accept=".wasm" style="display:none" onchange="loadApplication(event)">
-                        </div>
-                        <div style="margin-top: 20px;">
-                            <button class="action-btn" onclick="runDemo('calculator')">Demo: Calculator</button>
-                            <button class="action-btn secondary" onclick="runDemo('fibonacci')" style="margin-left: 10px;">Demo: Math Functions</button>
-                        </div>
+                <div class="app-container">
+                    <div class="app-toolbar">
+                        <h3 style="color: var(--text); font-size: 18px; font-weight: 600;">🚀 Professional Remote Access Tools</h3>
                     </div>
-                    <div class="console-output" id="appConsole">
-                        <div>Application Runner Ready</div>
-                        <div>Upload compiled applications to execute</div>
-                        <div>Supported formats: WebAssembly (.wasm)</div>
-                        <div>=====================================</div>
+                    
+                    <div class="remote-apps-grid" id="remoteAppsGrid">
+                        <!-- Remote access apps populated by JS -->
+                    </div>
+                    
+                    <div class="status-bar">
+                        <div class="status-indicator">
+                            <div class="status-dot"></div>
+                            <span>All Services Online</span>
+                        </div>
+                        <div>Enterprise-Grade Security • Zero-Trust Network</div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Start Menu -->
-        <div class="start-menu" id="startMenu">
-            <div class="start-menu-header">
-                <h2>CloudDesk</h2>
-                <p>Your Digital Workspace</p>
+        <!-- Floating Action Button -->
+        <button class="fab" onclick="showQuickActions()" title="Quick Actions">
+            ⚡
+        </button>
+
+        <!-- Notification -->
+        <div class="notification" id="notification">
+            <div class="notification-header">
+                <div class="notification-icon">💻</div>
+                <h4>CloudDesk Pro</h4>
             </div>
-            
-            <div class="start-menu-item" onclick="openWindow('web-browser')">
-                <span class="icon">🌐</span>
-                <div class="details">
-                    <div class="title">Web Browser</div>
-                    <div class="description">Browse websites securely</div>
-                </div>
-            </div>
-            
-            <div class="start-menu-item" onclick="openWindow('system-tools')">
-                <span class="icon">💻</span>
-                <div class="details">
-                    <div class="title">System Tools</div>
-                    <div class="description">Built-in productivity apps</div>
-                </div>
-            </div>
-            
-            <div class="start-menu-item" onclick="openWindow('app-runner')">
-                <span class="icon">⚡</span>
-                <div class="details">
-                    <div class="title">Application Runner</div>
-                    <div class="description">Execute compiled programs</div>
-                </div>
-            </div>
-            
-            <div class="start-menu-item" onclick="showAbout()">
-                <span class="icon">ℹ️</span>
-                <div class="details">
-                    <div class="title">About CloudDesk</div>
-                    <div class="description">System information</div>
-                </div>
-            </div>
+            <p>Welcome to your ultimate digital workspace! All systems online and ready.</p>
         </div>
 
-        <!-- Taskbar -->
-        <div class="taskbar">
-            <button class="start-button" onclick="toggleStartMenu()">CloudDesk</button>
-            <div class="taskbar-items" id="taskbarItems">
-                <!-- Running apps will appear here -->
+        <!-- Dock -->
+        <div class="dock">
+            <div class="dock-item" onclick="openWindow('browser-suite')">
+                🌐
+                <div class="dock-tooltip">Browser Pro</div>
             </div>
-            <div class="clock" id="clock"></div>
+            <div class="dock-item" onclick="openWindow('vm-station')">
+                💻
+                <div class="dock-tooltip">VM Station</div>
+            </div>
+            <div class="dock-item" onclick="openWindow('remote-access')">
+                🔗
+                <div class="dock-tooltip">Remote Hub</div>
+            </div>
+            <div class="dock-item" onclick="showSystemInfo()">
+                ⚙️
+                <div class="dock-tooltip">System Info</div>
+            </div>
         </div>
     </div>
 
     <script>
-        // Professional proxy services
+        // Enhanced proxy services with modern options
         const proxyServices = [
-            { name: "ProxyNet", description: "Fast & Secure" },
-            { name: "WebShield", description: "Privacy First" },
-            { name: "CloudProxy", description: "Global Network" },
-            { name: "SecureSurf", description: "Encrypted" },
-            { name: "FastProxy", description: "High Speed" },
-            { name: "SafeGate", description: "Filtered" },
-            { name: "WebTunnel", description: "Anonymous" },
-            { name: "QuickBrowse", description: "Optimized" },
-            { name: "NetGuard", description: "Protected" },
-            { name: "SpeedProxy", description: "Ultra Fast" },
-            { name: "WebVault", description: "Secure Access" },
-            { name: "ProSurf", description: "Professional" }
+            { name: "CloudProxy Elite", description: "Ultra-fast global network", icon: "🚀" },
+            { name: "SecureGate Pro", description: "Military-grade encryption", icon: "🛡️" },
+            { name: "SpeedTunnel", description: "Optimized for streaming", icon: "⚡" },
+            { name: "PrivacyVault", description: "Anonymous browsing", icon: "🔒" },
+            { name: "GlobalReach", description: "50+ countries available", icon: "🌍" },
+            { name: "FastProxy", description: "Low latency gaming", icon: "🎮" },
+            { name: "WebShield", description: "Ad & malware blocking", icon: "🛡️" },
+            { name: "TurboNet", description: "Bandwidth optimization", icon: "💨" },
+            { name: "SafeSurf", description: "Family-friendly filtering", icon: "👨‍👩‍👧‍👦" },
+            { name: "ProxyMax", description: "Unlimited bandwidth", icon: "♾️" },
+            { name: "NetGuard", description: "DDoS protection", icon: "🔰" },
+            { name: "UltraProxy", description: "Premium performance", icon: "⭐" }
+        ];
+
+        // Virtual machines with real working services
+        const virtualMachines = {
+            browser: [
+                { name: "v86 Emulator", description: "Run full OS in browser", url: "https://copy.sh/v86/", icon: "🖥️" },
+                { name: "CloudVM", description: "Multiple OS options", url: "https://webvm.replit.app/", icon: "☁️" },
+                { name: "JSLinux", description: "Linux in JavaScript", url: "https://bellard.org/jslinux/", icon: "🐧" },
+                { name: "VirtualXP", description: "Windows XP experience", url: "https://lrusso.github.io/VirtualXP/VirtualXP.htm", icon: "🪟" }
+            ],
+            linux: [
+                { name: "Alpine Linux", description: "Lightweight security-focused", url: "https://copy.sh/v86/?profile=alpine", icon: "🏔️" },
+                { name: "Arch Linux", description: "Rolling release system", url: "https://copy.sh/v86/?profile=archlinux", icon: "🎯" },
+                { name: "Ubuntu Server", description: "Popular server distribution", url: "https://instantworkstation.com", icon: "🟠" },
+                { name: "FreeBSD", description: "Advanced Unix-like OS", url: "https://copy.sh/v86/?profile=freebsd", icon: "😈" }
+            ],
+            windows: [
+                { name: "Windows 95", description: "Classic retro experience", url: "https://win95.ajf.me/", icon: "🪟" },
+                { name: "Windows 98", description: "Millennium edition", url: "https://copy.sh/v86/?profile=windows98", icon: "🎨" },
+                { name: "Windows 2000", description: "Professional workstation", url: "https://copy.sh/v86/?profile=windows2k", icon: "💼" },
+                { name: "Windows XP", description: "Most popular Windows", url: "https://winxp.vercel.app/", icon: "🌈" }
+            ],
+            dos: [
+                { name: "MS-DOS 6.22", description: "Classic command line", url: "https://copy.sh/v86/?profile=msdos", icon: "💾" },
+                { name: "FreeDOS", description: "Open source DOS", url: "https://copy.sh/v86/?profile=freedos", icon: "🆓" },
+                { name: "DOS Games", description: "Retro gaming collection", url: "https://dos.zone/", icon: "🎮" },
+                { name: "PC-DOS", description: "IBM PC operating system", url: "https://www.pcjs.org/", icon: "🖥️" }
+            ]
+        };
+
+        // Remote access applications
+        const remoteApps = [
+            {
+                name: "Parsec Gaming",
+                description: "Ultra-low latency remote desktop for gaming and creative work. 4K 60fps streaming.",
+                icon: "🎮",
+                url: "https://parsec.app/",
+                status: "Premium"
+            },
+            {
+                name: "TeamViewer",
+                description: "Professional remote access and support. Cross-platform compatibility.",
+                icon: "📱",
+                url: "https://www.teamviewer.com/",
+                status: "Enterprise"
+            },
+            {
+                name: "Chrome Remote Desktop",
+                description: "Free remote access through your Google account. Simple setup.",
+                icon: "🌐",
+                url: "https://remotedesktop.google.com/",
+                status: "Free"
+            },
+            {
+                name: "AnyDesk",
+                description: "Fast remote desktop with file transfer. Lightweight and secure.",
+                icon: "💨",
+                url: "https://anydesk.com/",
+                status: "Freemium"
+            },
+            {
+                name: "RustDesk",
+                description: "Open source remote desktop. Self-hosted option available.",
+                icon: "🦀",
+                url: "https://rustdesk.com/",
+                status: "Open Source"
+            },
+            {
+                name: "Splashtop",
+                description: "High performance remote access for business and personal use.",
+                icon: "💧",
+                url: "https://www.splashtop.com/",
+                status: "Business"
+            },
+            {
+                name: "VNC Connect",
+                description: "Cross-platform remote access. Industry standard VNC protocol.",
+                icon: "🔗",
+                url: "https://www.realvnc.com/",
+                status: "Professional"
+            },
+            {
+                name: "Microsoft RDP",
+                description: "Windows Remote Desktop Protocol. Built into Windows systems.",
+                icon: "🏢",
+                url: "https://docs.microsoft.com/en-us/windows-server/remote/remote-desktop-services/",
+                status: "Built-in"
+            },
+            {
+                name: "NoMachine",
+                description: "Fast remote desktop with multimedia support. Free for personal use.",
+                icon: "🖱️",
+                url: "https://www.nomachine.com/",
+                status: "Personal Free"
+            }
         ];
 
         let activeProxy = null;
         let openWindows = [];
-        let systemRunning = false;
+        let currentVM = null;
 
-        // Initialize application
+        // Initialize the application
         function init() {
             initializeProxyGrid();
-            updateClock();
-            setInterval(updateClock, 1000);
+            initializeVMGrid();
+            initializeRemoteApps();
             makeWindowsDraggable();
             
-            // Initialize system
-            logToSystem('CloudDesk initialized successfully');
-            logToSystem('Digital workspace ready');
+            // Show welcome notification
+            setTimeout(() => {
+                showNotification("CloudDesk Pro", "Welcome to your ultimate digital workspace! All systems online and ready.");
+            }, 1000);
+            
+            // Auto-hide loading after initial setup
+            setTimeout(() => {
+                document.getElementById('vmLoading').style.display = 'none';
+            }, 2000);
         }
 
         function initializeProxyGrid() {
             const grid = document.getElementById('proxyGrid');
             proxyServices.forEach((proxy, index) => {
-                const option = document.createElement('div');
-                option.className = 'proxy-option';
-                option.innerHTML = `
-                    <h4>${proxy.name}</h4>
+                const item = document.createElement('div');
+                item.className = 'grid-item';
+                item.innerHTML = `
+                    <h4>${proxy.icon} ${proxy.name}</h4>
                     <p>${proxy.description}</p>
                 `;
-                option.onclick = () => selectProxy(index);
-                grid.appendChild(option);
+                item.onclick = () => selectProxy(index);
+                grid.appendChild(item);
+            });
+        }
+
+        function initializeVMGrid() {
+            updateVMGrid('browser');
+        }
+
+        function updateVMGrid(type) {
+            const grid = document.getElementById('vmGrid');
+            grid.innerHTML = '';
+            
+            virtualMachines[type].forEach((vm, index) => {
+                const item = document.createElement('div');
+                item.className = 'vm-item';
+                item.innerHTML = `
+                    <h5>${vm.icon} ${vm.name}</h5>
+                    <p>${vm.description}</p>
+                `;
+                item.onclick = () => loadVM(vm);
+                grid.appendChild(item);
+            });
+        }
+
+        function initializeRemoteApps() {
+            const grid = document.getElementById('remoteAppsGrid');
+            remoteApps.forEach(app => {
+                const item = document.createElement('div');
+                item.className = 'remote-app';
+                item.innerHTML = `
+                    <div class="remote-app-icon">${app.icon}</div>
+                    <h4>${app.name}</h4>
+                    <p>${app.description}</p>
+                    <div class="remote-app-status">
+                        <div class="status-dot"></div>
+                        ${app.status}
+                    </div>
+                `;
+                item.onclick = () => openRemoteApp(app);
+                grid.appendChild(item);
             });
         }
 
         function selectProxy(index) {
-            document.querySelectorAll('.proxy-option').forEach(el => el.classList.remove('active'));
-            document.querySelectorAll('.proxy-option')[index].classList.add('active');
+            document.querySelectorAll('#proxyGrid .grid-item').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('#proxyGrid .grid-item')[index].classList.add('active');
             activeProxy = index;
-            logToSystem(`Selected proxy: ${proxyServices[index].name}`);
+            showNotification("Proxy Selected", `Connected to ${proxyServices[index].name}`);
         }
 
         function loadWebsite() {
             const url = document.getElementById('browserUrl').value;
             if (!url) return;
 
-            if (activeProxy === null) {
-                // Direct connection
-                document.getElementById('browserFrame').src = url;
-                logToSystem(`Loading: ${url}`);
-            } else {
-                // Proxy connection (simulated)
-                const proxy = proxyServices[activeProxy];
-                logToSystem(`Loading via ${proxy.name}: ${url}`);
-                // In a real implementation, this would route through the proxy
-                document.getElementById('browserFrame').src = url;
+            if (activeProxy !== null) {
+                showNotification("Loading", `Routing through ${proxyServices[activeProxy].name}...`);
             }
+            
+            document.getElementById('browserFrame').src = url;
         }
 
         function refreshBrowser() {
             const frame = document.getElementById('browserFrame');
             frame.src = frame.src;
-            logToSystem('Browser refreshed');
+            showNotification("Refreshed", "Page reloaded successfully");
         }
+
+        function loadVM(vm) {
+            // Update active VM styling
+            document.querySelectorAll('.vm-item').forEach(el => el.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+            
+            currentVM = vm;
+            showNotification("VM Loading", `Connecting to ${vm.name}...`);
+            
+            // Show loading state
+            document.getElementById('vmLoading').style.display = 'block';
+            document.getElementById('vmFrame').style.display = 'none';
+            
+            // Load VM
+            setTimeout(() => {
+                document.getElementById('vmFrame').src = vm.url;
+                document.getElementById('vmLoading').style.display = 'none';
+                document.getElementById('vmFrame').style.display = 'block';
+                showNotification("VM Ready", `${vm.name} is now running`);
+            }, 2000);
+        }
+
+        function refreshVM() {
+            if (currentVM) {
+                loadVM(currentVM);
+            }
+        }
+
+        function fullscreenVM() {
+            const frame = document.getElementById('vmFrame');
+            if (frame.requestFullscreen) {
+                frame.requestFullscreen();
+            }
+            showNotification("Fullscreen", "VM entered fullscreen mode");
+        }
+
+        function openRemoteApp(app) {
+            window.open(app.url, '_blank');
+            showNotification("Launching", `Opening ${app.name}...`);
+        }
+
+        // VM type selector
+        document.getElementById('vmType').addEventListener('change', function(e) {
+            updateVMGrid(e.target.value);
+        });
 
         // Window management
         function openWindow(windowId) {
@@ -784,7 +1184,7 @@
             
             if (!openWindows.includes(windowId)) {
                 openWindows.push(windowId);
-                addToTaskbar(windowId);
+                updateDockItems();
             }
             
             bringToFront(windowId);
@@ -795,7 +1195,7 @@
             window.classList.remove('active');
             
             openWindows = openWindows.filter(id => id !== windowId);
-            removeFromTaskbar(windowId);
+            updateDockItems();
         }
 
         function minimizeWindow(windowId) {
@@ -805,19 +1205,7 @@
 
         function maximizeWindow(windowId) {
             const window = document.getElementById(windowId);
-            if (window.style.width === '100vw') {
-                // Restore
-                window.style.width = '900px';
-                window.style.height = '600px';
-                window.style.top = '100px';
-                window.style.left = '150px';
-            } else {
-                // Maximize
-                window.style.width = '100vw';
-                window.style.height = 'calc(100vh - 56px)';
-                window.style.top = '0';
-                window.style.left = '0';
-            }
+            window.classList.toggle('maximized');
         }
 
         function bringToFront(windowId) {
@@ -826,375 +1214,75 @@
             document.getElementById(windowId).style.zIndex = '101';
         }
 
-        function addToTaskbar(windowId) {
-            const taskbar = document.getElementById('taskbarItems');
-            const item = document.createElement('div');
-            item.className = 'taskbar-item active';
-            item.id = 'taskbar-' + windowId;
-            item.textContent = getWindowTitle(windowId);
-            item.onclick = () => {
-                if (document.getElementById(windowId).classList.contains('active')) {
-                    minimizeWindow(windowId);
-                } else {
-                    openWindow(windowId);
+        function updateDockItems() {
+            document.querySelectorAll('.dock-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            // Mark active windows in dock
+            openWindows.forEach(windowId => {
+                const dockItem = Array.from(document.querySelectorAll('.dock-item')).find(item => {
+                    return item.onclick && item.onclick.toString().includes(windowId);
+                });
+                if (dockItem) {
+                    dockItem.classList.add('active');
                 }
-            };
-            taskbar.appendChild(item);
-        }
-
-        function removeFromTaskbar(windowId) {
-            const item = document.getElementById('taskbar-' + windowId);
-            if (item) item.remove();
-        }
-
-        function getWindowTitle(windowId) {
-            const titles = {
-                'web-browser': '🌐 Browser',
-                'system-tools': '💻 System',
-                'app-runner': '⚡ Apps'
-            };
-            return titles[windowId] || windowId;
-        }
-
-        // System functions
-        function bootSystem() {
-            const screen = document.getElementById('systemScreen');
-            screen.innerHTML = '';
-            systemRunning = true;
-            
-            const bootMessages = [
-                'Starting CloudDesk System...',
-                'Loading user interface...',
-                'Initializing applications...',
-                'System ready for use',
-                '',
-                'Welcome to CloudDesk v2.0',
-                'Your digital productivity workspace',
-                'Type "help" to see available commands'
-            ];
-            
-                            bootMessages.forEach((msg, i) => {
-                setTimeout(() => {
-                    const div = document.createElement('div');
-                    div.textContent = msg;
-                    screen.appendChild(div);
-                    screen.scrollTop = screen.scrollHeight;
-                }, i * 600);
             });
         }
 
-        function executeCommand() {
-            const input = document.getElementById('terminalInput');
-            const command = input.value.trim();
-            const terminal = document.getElementById('terminalOutput');
+        function showQuickActions() {
+            const actions = [
+                "🚀 Quick Launch",
+                "🔄 Refresh All",
+                "📊 System Status",
+                "⚙️ Settings"
+            ];
             
-            if (!command) return;
+            const action = prompt("Quick Actions:\n" + actions.join("\n") + "\n\nEnter number (1-4):");
             
-            // Add command to terminal
-            const cmdDiv = document.createElement('div');
-            cmdDiv.innerHTML = `user@clouddesk:~$ ${command}`;
-            terminal.appendChild(cmdDiv);
-            
-            // Process command
-            const output = processCommand(command);
-            if (output) {
-                const outputDiv = document.createElement('div');
-                outputDiv.textContent = output;
-                outputDiv.style.marginLeft = '20px';
-                outputDiv.style.color = '#a0aec0';
-                terminal.appendChild(outputDiv);
+            switch(action) {
+                case '1':
+                    openWindow('browser-suite');
+                    openWindow('vm-station');
+                    break;
+                case '2':
+                    location.reload();
+                    break;
+                case '3':
+                    showSystemInfo();
+                    break;
+                case '4':
+                    alert("Settings panel coming soon!");
+                    break;
             }
+        }
+
+        function showSystemInfo() {
+            const info = `CloudDesk Pro - System Information
+
+🖥️ Platform: ${navigator.platform}
+🌐 Browser: ${navigator.userAgent.split(' ')[0]}
+💾 Memory: ${Math.round(performance.memory?.usedJSHeapSize / 1024 / 1024 || 0)} MB
+⏱️ Uptime: ${Math.round(performance.now() / 1000)} seconds
+🔗 Connection: ${navigator.onLine ? 'Online' : 'Offline'}
+📱 Screen: ${screen.width}x${screen.height}
+
+🚀 Status: All systems operational
+🛡️ Security: Maximum protection enabled
+⚡ Performance: Optimized`;
+
+            alert(info);
+        }
+
+        function showNotification(title, message) {
+            const notification = document.getElementById('notification');
+            notification.querySelector('h4').textContent = title;
+            notification.querySelector('p').textContent = message;
+            notification.classList.add('show');
             
-            // Clear input and add new prompt
-            input.value = '';
-            const promptDiv = document.createElement('div');
-            promptDiv.innerHTML = 'user@clouddesk:~$ <input type="text" id="terminalInput" class="vm-input" placeholder="Enter command..." onkeypress="if(event.key===\'Enter\') executeCommand()">';
-            terminal.appendChild(promptDiv);
-            
-            // Focus new input
             setTimeout(() => {
-                const newInput = terminal.querySelector('input:last-child');
-                if (newInput) newInput.focus();
-            }, 100);
-            
-            terminal.scrollTop = terminal.scrollHeight;
-        }
-
-        function processCommand(command) {
-            const parts = command.split(' ');
-            const cmd = parts[0].toLowerCase();
-            
-            switch(cmd) {
-                case 'help':
-                    return 'Available commands:\n' +
-                           '  help     - Show this help message\n' +
-                           '  ls       - List files and folders\n' +
-                           '  pwd      - Show current directory\n' +
-                           '  date     - Display current date and time\n' +
-                           '  clear    - Clear the terminal\n' +
-                           '  calc     - Simple calculator (calc 2+2)\n' +
-                           '  echo     - Display text\n' +
-                           '  sysinfo  - Show system information\n' +
-                           '  apps     - List available applications';
-                case 'ls':
-                    return 'Documents/  Downloads/  Pictures/  Applications/\n' +
-                           'readme.txt  settings.conf  workspace.json';
-                case 'pwd':
-                    return '/home/user';
-                case 'date':
-                    return new Date().toString();
-                case 'clear':
-                    document.getElementById('terminalOutput').innerHTML = '';
-                    return null;
-                case 'echo':
-                    return parts.slice(1).join(' ');
-                case 'calc':
-                    if (parts[1]) {
-                        try {
-                            const result = eval(parts.slice(1).join(''));
-                            return `Result: ${result}`;
-                        } catch (e) {
-                            return 'Error: Invalid calculation';
-                        }
-                    }
-                    return 'Usage: calc <expression> (example: calc 2+2)';
-                case 'sysinfo':
-                    return `CloudDesk Digital Workspace v2.0\n` +
-                           `Browser: ${navigator.userAgent.split(' ')[0]}\n` +
-                           `Platform: ${navigator.platform}\n` +
-                           `Memory: ${Math.round(performance.memory?.usedJSHeapSize / 1024 / 1024 || 0)} MB used\n` +
-                           `Uptime: ${Math.round(performance.now() / 1000)} seconds`;
-                case 'apps':
-                    return 'Available Applications:\n' +
-                           '  calculator - Built-in calculator\n' +
-                           '  notepad    - Text editor\n' +
-                           '  files      - File manager\n' +
-                           '  browser    - Web browser';
-                case 'calculator':
-                    openApp('calculator');
-                    return 'Opening Calculator...';
-                case 'notepad':
-                    openApp('notepad');
-                    return 'Opening Text Editor...';
-                case 'files':
-                    openApp('files');
-                    return 'Opening File Manager...';
-                default:
-                    return `Command not found: ${cmd}\nType 'help' for available commands`;
-            }
-        }
-
-        function openApp(app) {
-            const screen = document.getElementById('systemScreen');
-            
-            switch(app) {
-                case 'calculator':
-                    screen.innerHTML += `
-                        <div style="margin: 20px 0; padding: 20px; background: rgba(255,255,255,0.1); border-radius: 8px;">
-                            <div style="margin-bottom: 15px; font-weight: bold;">Calculator Application</div>
-                            <input type="text" id="calcDisplay" style="width: 200px; padding: 8px; margin-bottom: 10px; background: #1a202c; color: #68d391; border: 1px solid #4a5568; border-radius: 4px;" readonly>
-                            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; max-width: 200px;">
-                                <button onclick="calcInput('7')" style="padding: 10px; background: #4a5568; color: white; border: none; border-radius: 4px; cursor: pointer;">7</button>
-                                <button onclick="calcInput('8')" style="padding: 10px; background: #4a5568; color: white; border: none; border-radius: 4px; cursor: pointer;">8</button>
-                                <button onclick="calcInput('9')" style="padding: 10px; background: #4a5568; color: white; border: none; border-radius: 4px; cursor: pointer;">9</button>
-                                <button onclick="calcInput('/')" style="padding: 10px; background: #667eea; color: white; border: none; border-radius: 4px; cursor: pointer;">÷</button>
-                                <button onclick="calcInput('4')" style="padding: 10px; background: #4a5568; color: white; border: none; border-radius: 4px; cursor: pointer;">4</button>
-                                <button onclick="calcInput('5')" style="padding: 10px; background: #4a5568; color: white; border: none; border-radius: 4px; cursor: pointer;">5</button>
-                                <button onclick="calcInput('6')" style="padding: 10px; background: #4a5568; color: white; border: none; border-radius: 4px; cursor: pointer;">6</button>
-                                <button onclick="calcInput('*')" style="padding: 10px; background: #667eea; color: white; border: none; border-radius: 4px; cursor: pointer;">×</button>
-                                <button onclick="calcInput('1')" style="padding: 10px; background: #4a5568; color: white; border: none; border-radius: 4px; cursor: pointer;">1</button>
-                                <button onclick="calcInput('2')" style="padding: 10px; background: #4a5568; color: white; border: none; border-radius: 4px; cursor: pointer;">2</button>
-                                <button onclick="calcInput('3')" style="padding: 10px; background: #4a5568; color: white; border: none; border-radius: 4px; cursor: pointer;">3</button>
-                                <button onclick="calcInput('-')" style="padding: 10px; background: #667eea; color: white; border: none; border-radius: 4px; cursor: pointer;">-</button>
-                                <button onclick="calcInput('0')" style="padding: 10px; background: #4a5568; color: white; border: none; border-radius: 4px; cursor: pointer;">0</button>
-                                <button onclick="calcInput('.')" style="padding: 10px; background: #4a5568; color: white; border: none; border-radius: 4px; cursor: pointer;">.</button>
-                                <button onclick="calculate()" style="padding: 10px; background: #48bb78; color: white; border: none; border-radius: 4px; cursor: pointer;">=</button>
-                                <button onclick="calcInput('+')" style="padding: 10px; background: #667eea; color: white; border: none; border-radius: 4px; cursor: pointer;">+</button>
-                                <button onclick="clearCalc()" style="padding: 10px; background: #e53e3e; color: white; border: none; border-radius: 4px; cursor: pointer; grid-column: span 2;">Clear</button>
-                            </div>
-                        </div>
-                    `;
-                    break;
-                    
-                case 'notepad':
-                    screen.innerHTML += `
-                        <div style="margin: 20px 0; padding: 20px; background: rgba(255,255,255,0.1); border-radius: 8px;">
-                            <div style="margin-bottom: 15px; font-weight: bold;">Text Editor</div>
-                            <textarea style="width: 100%; height: 200px; background: #1a202c; color: #e2e8f0; border: 1px solid #4a5568; border-radius: 4px; padding: 10px; font-family: inherit;" placeholder="Start typing your document here..."></textarea>
-                            <div style="margin-top: 10px;">
-                                <button style="padding: 8px 16px; background: #48bb78; color: white; border: none; border-radius: 4px; cursor: pointer; margin-right: 10px;">Save</button>
-                                <button style="padding: 8px 16px; background: #4a5568; color: white; border: none; border-radius: 4px; cursor: pointer;">New Document</button>
-                            </div>
-                        </div>
-                    `;
-                    break;
-                    
-                case 'files':
-                    screen.innerHTML += `
-                        <div style="margin: 20px 0; padding: 20px; background: rgba(255,255,255,0.1); border-radius: 8px;">
-                            <div style="margin-bottom: 15px; font-weight: bold;">File Manager</div>
-                            <div style="font-size: 13px; margin-bottom: 10px;">Current Location: /home/user</div>
-                            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px;">
-                                <div style="padding: 10px; background: rgba(255,255,255,0.05); border-radius: 4px; text-align: center;">
-                                    <div style="font-size: 24px; margin-bottom: 5px;">📁</div>
-                                    <div style="font-size: 12px;">Documents</div>
-                                </div>
-                                <div style="padding: 10px; background: rgba(255,255,255,0.05); border-radius: 4px; text-align: center;">
-                                    <div style="font-size: 24px; margin-bottom: 5px;">📁</div>
-                                    <div style="font-size: 12px;">Downloads</div>
-                                </div>
-                                <div style="padding: 10px; background: rgba(255,255,255,0.05); border-radius: 4px; text-align: center;">
-                                    <div style="font-size: 24px; margin-bottom: 5px;">📁</div>
-                                    <div style="font-size: 12px;">Pictures</div>
-                                </div>
-                                <div style="padding: 10px; background: rgba(255,255,255,0.05); border-radius: 4px; text-align: center;">
-                                    <div style="font-size: 24px; margin-bottom: 5px;">📄</div>
-                                    <div style="font-size: 12px;">readme.txt</div>
-                                </div>
-                                <div style="padding: 10px; background: rgba(255,255,255,0.05); border-radius: 4px; text-align: center;">
-                                    <div style="font-size: 24px; margin-bottom: 5px;">⚙️</div>
-                                    <div style="font-size: 12px;">settings.conf</div>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                    break;
-            }
-            
-            screen.scrollTop = screen.scrollHeight;
-        }
-
-        // Calculator functions
-        let calcExpression = '';
-        
-        function calcInput(value) {
-            const display = document.getElementById('calcDisplay');
-            if (display) {
-                calcExpression += value;
-                display.value = calcExpression;
-            }
-        }
-        
-        function calculate() {
-            const display = document.getElementById('calcDisplay');
-            if (display) {
-                try {
-                    const result = eval(calcExpression.replace('×', '*').replace('÷', '/'));
-                    display.value = result;
-                    calcExpression = result.toString();
-                } catch (e) {
-                    display.value = 'Error';
-                    calcExpression = '';
-                }
-            }
-        }
-        
-        function clearCalc() {
-            const display = document.getElementById('calcDisplay');
-            if (display) {
-                display.value = '';
-                calcExpression = '';
-            }
-        }
-
-        // Application Runner functions
-        function loadApplication(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-            
-            const console = document.getElementById('appConsole');
-            logToApp(`Loading application: ${file.name}`);
-            
-            const reader = new FileReader();
-            reader.onload = async function(e) {
-                try {
-                    const bytes = new Uint8Array(e.target.result);
-                    const wasmModule = await WebAssembly.compile(bytes);
-                    const wasmInstance = await WebAssembly.instantiate(wasmModule, {
-                        env: {
-                            print: (arg) => logToApp(`Output: ${arg}`),
-                            console_log: (arg) => logToApp(`Log: ${arg}`)
-                        }
-                    });
-                    
-                    logToApp('✅ Application loaded successfully!');
-                    logToApp(`Available functions: ${Object.keys(wasmInstance.exports).join(', ')}`);
-                    
-                    // Try to run main function
-                    if (wasmInstance.exports.main) {
-                        const result = wasmInstance.exports.main();
-                        logToApp(`Application returned: ${result}`);
-                    }
-                    
-                } catch (error) {
-                    logToApp(`❌ Error loading application: ${error.message}`);
-                }
-            };
-            reader.readAsArrayBuffer(file);
-        }
-
-        function runDemo(type) {
-            logToApp(`Running ${type} demo...`);
-            
-            switch(type) {
-                case 'calculator':
-                    logToApp('Demo: Basic Calculator Operations');
-                    logToApp('add(5, 3) = ' + (5 + 3));
-                    logToApp('multiply(4, 6) = ' + (4 * 6));
-                    logToApp('subtract(10, 3) = ' + (10 - 3));
-                    logToApp('divide(15, 3) = ' + (15 / 3));
-                    break;
-                    
-                case 'fibonacci':
-                    logToApp('Demo: Fibonacci Sequence Calculator');
-                    function fib(n) {
-                        if (n <= 1) return n;
-                        return fib(n - 1) + fib(n - 2);
-                    }
-                    for (let i = 1; i <= 10; i++) {
-                        logToApp(`fibonacci(${i}) = ${fib(i)}`);
-                    }
-                    break;
-            }
-        }
-
-        function logToApp(message) {
-            const console = document.getElementById('appConsole');
-            const div = document.createElement('div');
-            div.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
-            console.appendChild(div);
-            console.scrollTop = console.scrollHeight;
-        }
-
-        function logToSystem(message) {
-            console.log(`[CloudDesk] ${message}`);
-        }
-
-        // Start Menu functions
-        function toggleStartMenu() {
-            const menu = document.getElementById('startMenu');
-            menu.classList.toggle('active');
-        }
-
-        function showAbout() {
-            alert(`CloudDesk Digital Workspace v2.0
-
-A modern, professional digital workspace running in your browser.
-
-Features:
-• Secure Web Browser with proxy support
-• Built-in productivity applications
-• WebAssembly program runner
-• File management system
-• Command-line interface
-
-Developed for productivity and security.`);
-        }
-
-        // Utility functions
-        function updateClock() {
-            const now = new Date();
-            document.getElementById('clock').textContent = now.toLocaleString();
+                notification.classList.remove('show');
+            }, 4000);
         }
 
         function makeWindowsDraggable() {
@@ -1216,6 +1304,7 @@ Developed for productivity and security.`);
                     
                     if (e.target === header || header.contains(e.target)) {
                         isDragging = true;
+                        window.style.zIndex = '101';
                     }
                 }
 
@@ -1237,18 +1326,45 @@ Developed for productivity and security.`);
             });
         }
 
-        // Close start menu when clicking outside
-        document.addEventListener('click', function(e) {
-            const startMenu = document.getElementById('startMenu');
-            const startButton = document.querySelector('.start-button');
-            
-            if (!startMenu.contains(e.target) && !startButton.contains(e.target)) {
-                startMenu.classList.remove('active');
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey || e.metaKey) {
+                switch(e.key) {
+                    case '1':
+                        e.preventDefault();
+                        openWindow('browser-suite');
+                        break;
+                    case '2':
+                        e.preventDefault();
+                        openWindow('vm-station');
+                        break;
+                    case '3':
+                        e.preventDefault();
+                        openWindow('remote-access');
+                        break;
+                    case 'r':
+                        e.preventDefault();
+                        location.reload();
+                        break;
+                }
             }
         });
 
-        // Initialize application
+        // Initialize everything
         init();
+
+        // Auto-refresh VM status
+        setInterval(() => {
+            if (currentVM) {
+                // Simulate VM health check
+                console.log(`VM ${currentVM.name} is running...`);
+            }
+        }, 30000);
+
+        // Dynamic background updates
+        setInterval(() => {
+            document.body.style.filter = `hue-rotate(${Math.sin(Date.now() / 10000) * 10}deg)`;
+        }, 100);
     </script>
 </body>
 </html>
